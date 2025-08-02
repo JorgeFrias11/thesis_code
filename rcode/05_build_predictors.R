@@ -16,7 +16,7 @@ for (package_used in packages_used) {
   }
 }
 
-setwd(Sys.getenv("THESIS_WORKDIR"))
+setwd(Sys.getenv("THESIS_DATA_DIR"))
 cat("Current working directory: \n")
 getwd()
 
@@ -29,9 +29,9 @@ start_time <- Sys.time()
 
 cat("Reading file...", "\n")
 
-coindata <- readRDS("data/CoinsData_2020_restricted.rds")
-all_vars_output_file <- "daily_predictors_2020_restricted.rds"
-data_dir <- "data/data_2020_res"
+coindata <- readRDS(file="data/coins_data.rds")
+all_vars_output_file <- "daily_predictors.rds"
+data_dir <- "data/"
 #output_file <- "predictors2.rds"
 
 cat("Constructing predictors...", "\n")
@@ -121,7 +121,6 @@ coindata <- coindata %>%
          dh90 = close / slide_dbl(.x = close,  # before, dplyr::lag(close)
                                   .f = max,
                                   .before = 89L,
-                                  #.after = -1L,
                                   .complete = TRUE))
 
   
@@ -180,11 +179,12 @@ cat("Constructing Volality and Risk (4/7)...", "\n")
 
 # 1-month Treasury bill rate as Risk-free rate proxy
 #getSymbols("DGS1MO", src = "FRED")
-#saveRDS(DGS1MO, file = "data/tbill_1mo.rds")
-tbill <- readRDS("data/tbill_1mo.rds")
+# save(DGS1MO, file = "tbill_1mo.rda")
+load("tbill_1mo.rda")
+tbill <- DGS1MO
 
 # Risk-Free rate.  Fill NAs with previous obs and convert to dataframe
-r_f <- na.locf(tbill["2013-12-31/2025-04-30"])[-1] / 100  
+r_f <- na.locf(tbill["2013-12-31/2025-07-31"])[-1] / 100  
 r_f <- data.frame(date = index(r_f), rf = as.numeric(r_f))
 
 # Crypto daily market return
@@ -488,7 +488,6 @@ coindata <- left_join(
 
 
 cat("News done...", "\n")
-
 
 
 ########################################################################

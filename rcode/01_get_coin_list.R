@@ -5,7 +5,7 @@
 # For more coins, increase limit at the URL
 ###############################################################################
 
-setwd(Sys.getenv("THESIS_WORKDIR"))
+setwd(Sys.getenv("THESIS_CODE"))
 
 libraries_used <- c("httr", "jsonlite", "dplyr")
 
@@ -16,10 +16,9 @@ for (library_used in libraries_used) {
   }
 }
 
-# Call full coin list endpoint
-# Get 4000 coin names
-allcoins_url <- "https://coincodex.com/api/v1/coins_compat/get_coin_list?limit=15000"
-coins4000_url <- "https://coincodex.com/api/v1/coins_compat/get_coin_list?limit=4000"
+# Call full coin list endpoint. Max processable limit is 5000 
+# Get coin names
+allcoins_url <- "https://coincodex.com/api/v1/coins_compat/get_coin_list?limit=5000"
 stablecoins_url <- "https://coincodex.com/api/v1/coins_compat/get_coin_list?categories=stablecoins"
 
 # Parse
@@ -33,8 +32,8 @@ get_names <- function(url){
     
     # Select useful fields
     coins_df <- data$data %>%
-      select(symbol, name, shortname, trading_since, market_cap_rank,
-             average_mktcap_all_time) %>%
+      select(symbol, name, shortname, market_cap_rank, 
+             trading_since, last_market_cap_usd) %>%
       distinct()
     
     coins_df$trading_since <- as.Date(
@@ -53,7 +52,7 @@ get_names <- function(url){
 
 ############## Test
 
-response <- GET(stablecoins_url)
+response <- GET("https://coincodex.com/api/v1/coins_compat/get_coin_list?limit=200")
 json <- content(response, as = "text", encoding = "UTF-8")
 data <- fromJSON(json)
 data
@@ -62,36 +61,23 @@ data
 ###############################################################################
 # The initial sample was coins4000, but it gets coins based on its last days'
 # marketcapitalization. This may induce a "survivorship bias". 
-# I get all coin names available, take the difference and store it. 
+# I get all coin names available - up to the 5000 limit.
 ###############################################################################
 
-coins4000 <- get_names(coins4000_url)   
 allnames <- get_names(allcoins_url)
 stablecoins <- get_names(stablecoins_url)
 
 
 allcoins <- allnames %>%
-  filter(!is.na(trading_since)) %>% # remove coins with missing trading_since
+  filter(!is.na(trading_since)) %>% # remove coins with missing trading_since, only 3
   arrange(trading_since) %>%
   mutate(age_i = row_number()) 
 
-
-# different coinnames
-diffcoins <- setdiff(allcoins$shortname, coins4000$shortname)
-
-# Take diff and remove stable coins:  9691 coins
-missingcoins <- allcoins %>%       
-  filter(shortname %in% diffcoins) %>%
+# Remove stable coins:  4958 coins
+filtered_coins <- allcoins %>%       
   filter(!(symbol %in% stablecoins$symbol))
 
-summary(missingcoins) # all coins have no marketcap rank, possibly they're dead
-
-# Remove stable coins from the list: 3963 out of 4000 coins
-filtered_coins <- coins4000 %>%
-  filter(!(symbol %in% stablecoins$symbol))
-
+summary(filtered_coins) # not all coins have marketcap rank or last market cap, possibly they're dead
 
 # shortname is what we want to construct the URLs
-writeLines(filtered_coins$shortname, "code/coins_shortname.txt")
-
-writeLines(missingcoins$shortname, "code/missingcoins_shortname.txt")
+writeLines(filtered_coins$shortname, "rcode/coins_shortname.txt")

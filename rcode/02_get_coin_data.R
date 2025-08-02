@@ -5,7 +5,7 @@
 # We save the data to coinData.rds
 ######################################################
 
-setwd(Sys.getenv("THESIS_WORKDIR"))
+setwd(Sys.getenv("THESIS_CODE"))
 
 libraries_used <- c("httr", "jsonlite", "dplyr", "tidyverse")
 
@@ -51,7 +51,7 @@ get_CoinData <- function(coin, start_date, end_date) {
       high = price_high_usd,
       low = price_low_usd,
       volume = volume_usd,
-      marketcap = market_cap_usd,
+      marketcap = market_cap_usd
     ) %>%
     select(date, coinName, open, close, high, low, volume, marketcap) %>%
     # remove obs where value <= 0
@@ -81,10 +81,9 @@ store_coin_data <- function(coin, start_date, end_date) {
 
 # Date range from 2014, since there's no volume data before
 start_date <- "2014-01-01"
-end_date <- "2025-04-30"
+end_date <- "2025-07-31"
 
-coinNames <- readLines("code/coins_shortname.txt")
-coinNames <- coinNames[1:1000]
+coinNames <- readLines("rcode/coins_shortname.txt")
 
 # Apply to all coins using lapply
 coin_dfs <- lapply(coinNames, function(name) {
@@ -95,10 +94,9 @@ coin_dfs <- lapply(coinNames, function(name) {
 coindata <- bind_rows(coin_dfs)
 
 # number of unique coins
-length(unique(coindata$coinName))
+cat("Number of unique coins:", length(unique(coindata$coinName)))
 
-data_dir <- "data"
-out_file <- "1_coins_1_1000.rds"
+data_dir <- Sys.getenv("THESIS_DATA_DIR")
+out_file <- "coin_raw_data.rds"
 
-#saveRDS(coins551.2000, file = "coins551.2000.rds")
 saveRDS(coindata, file = file.path(data_dir, out_file))

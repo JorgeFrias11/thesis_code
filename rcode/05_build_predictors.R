@@ -468,13 +468,13 @@ cat("Constructing News (7/7)...", "\n")
 
 last_date <- max(coindata$date, na.rm = T)
 
-gpr <- read_xlsx("data/data_gpr_daily_recent.xlsx", sheet = "Sheet1")
+gpr <- read_xlsx("data_gpr_daily_recent.xlsx", sheet = "Sheet1")
 gpr <- gpr %>%
   mutate(date = as.Date(date)) %>%
   select(date, GPRD, GPRD_MA7, GPRD_MA30) %>% 
   filter(date >= "2014-01-01" & date <= last_date)
 
-nsi <- read_xlsx("data/news_sentiment_data.xlsx", sheet = "Data")
+nsi <- read_xlsx("news_sentiment_data.xlsx", sheet = "Data")
 nsi <- nsi %>%
   mutate(date = as.Date(date)) %>%
   select(date = date, nsi = 'News Sentiment') %>%

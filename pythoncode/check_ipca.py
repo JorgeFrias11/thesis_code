@@ -1,139 +1,148 @@
-import time
 import sys
 from pathlib import Path
-import ipca
-import numpy as np
 import pandas as pd
-from itertools import product
+
 # Add the parent of the parent directory to the Python path
 
-#current_dir = Path().resolve()
-#sys.path.append(str(current_dir.parents[1]))
+current_dir = Path().resolve()
+sys.path.append(str(current_dir.parents[1]))
 
-import ipca_utils
+import new_ipca_utils
+import ipca_pruitt
 
-#import inspect
-#print(inspect.getsource(ipca_utils.load_coindata))
-#
-
-datapath = "/home/jfriasna/thesis/data/new_data360"
-data = ipca_utils.load_coindata('daily', datapath, cache_file = '02_cache_new360_daily.pkl',
-                                daily_rds='new_daily_360_predictors.rds',
-                                ignore_cols=['r180_60', 'logvol', 'volscaled'],
+datapath = "/home/jfriasna/thesis/data/newer_data360"
+data = new_ipca_utils.load_coindata('daily', datapath,
+                                cache_file = 'cache_pruitt_360_daily_all.pkl',
+                                daily_rds='daily_360_predictors.rds',
+                                #ignore_cols=['r180_60', 'logvol'],
+                                pruitt=True,
                                 save = True)
 
+print(data.columns)
 
-########################### TEST CODE
+### TEST CODE 
 
-### Filter marketcap
+## Filter marketcap
 # Get the last observation for each coin
 last_obs = data.groupby(level='coinName').tail(1)
-# Filter those with marketcap > 10 million (more restrictive)
-low_mcap_coins = last_obs[last_obs['marketcap'] > 10_000_000]
+# Filter those with low marketcap 
+lower = 1_000_000
+low_mcap_coins = last_obs[last_obs['marketcap'] >= lower]
 # Get the coin names (index level 0)
 coin_ids = low_mcap_coins.index.get_level_values('coinName').unique()
 # Filter the original data
-filtered_data = data.loc[coin_ids]
-# Number of coins: 242
+idx = pd.IndexSlice
+filtered_data = data.loc[idx[:, coin_ids], :]
+# Number of coins: 684
 len(filtered_data.index.get_level_values('coinName').unique())
 
+
+### Keep these comments
 # Remove coins with less than 365 observations
 counts = filtered_data.groupby(level='coinName').size()
 coins_with_365 = counts[counts > 365].index
-# Number of coins: 230, 12 are removed
-len(coins_with_365)
-# Step 3: Filter the original DataFrame
-filtered_data = filtered_data.loc[coins_with_365]
+print('Number of coins:', len(coins_with_365))
+
+# Filter the original DataFrame
+idx = pd.IndexSlice
+filtered_data = filtered_data.loc[idx[:, coins_with_365], :]
 
 data = filtered_data
-############################################################
+
+# Following the code of Kelly et al. (2019), keep dates with a min cross-section of 100 coins
+
+print("n rows before min cross-section:", data.shape)
+
+min_coins = 100
+obs_per_date = data.groupby(level=0).size() # for Pruitt code, date is level 0
+# Only keep dates with enough coins
+valid_dates = obs_per_date[obs_per_date >= min_coins].index
+data = data[data.index.get_level_values(0).isin(valid_dates)]
+
+print("nrows after removing low cross-section dates:", data.shape)
+
+##################################################################################
+## TEST 2: Shorten time period, and keep coins with at least 75% of total obs
+## Period: 2020-01-01 to 2025-04-30
+##################################################################################
+
+# Step 1: Convert the integer date level to datetime
+#date_ints = data.index.get_level_values('date')
+#date_dt = pd.to_datetime(date_ints.astype(str), format="%Y%m%d")
+#
+## Step 2: Mask for date range (2020-01-01 to 2025-04-30)
+#start_date = pd.to_datetime("2020-01-01")
+#end_date = pd.to_datetime("2025-04-30")
+#mask = (date_dt >= start_date) & (date_dt <= end_date)
+#
+## Step 3: Apply the mask to filter data
+#data_in_range = data[mask]
+#
+## Step 4: Compute how many unique dates exist in the range
+#total_dates = date_dt[mask].unique()
+#num_days = len(total_dates)
+#
+## Step 5: Count number of observations per coin
+#coin_counts = data_in_range.groupby(level='coinName').size()
+#
+## Step 6: Keep coins with >= 75% of possible observations
+#min_obs_required = int(0.75 * num_days)
+#eligible_coins = coin_counts[coin_counts >= min_obs_required].index
+#
+## 443 coins
+#print("Total number of coins:", len(eligible_coins))
+#
+## Step 7: Filter the data
+#idx = pd.IndexSlice
+#filtered_data = data_in_range.loc[idx[:, eligible_coins], :]
+#
+#data = filtered_data
 
 
-
-data_y = data['ret_excess']
-data_x = data.drop("ret_excess", axis=1)
-
-# Rescale columns as per Kelly. Omit news factors!
-news_cols = ['GPRD', 'GPRD_MA7', 'GPRD_MA30', 'nsi']
-to_transform = data_x.drop(columns=news_cols)
-to_keep = data_x[news_cols]
-
-# Apply the transform only to the other columns
-transformed = to_transform.groupby(level='date').transform(ipca_utils.rank_scale)
-
-# Recombine columns
-data_x = pd.concat([transformed, to_keep], axis=1)
-
-
-# level for daily data is "date", for weekly change to "yyyyww"
-#data_x = data_x.groupby(level='date').transform(ipca_utils.rank_scale)  # only scale X
-
-
-#corr_matrix = data_x.corr()
-
-# Stack into long format (row-wise pairs)
-#corr_pairs = corr_matrix.stack()
-# Filter: keep only values > 0.85 and < 1 (to exclude self-correlation)
-#high_corr = corr_pairs[(abs(corr_pairs) > 0.85) & (abs(corr_pairs) < 1)]
+#data_y = data['ret_excess']
+#data_x = data.drop("ret_excess", axis=1)
 
 # remove variable with high correlation
-data_x = data_x.drop(["illiq", 'volume_30d', "std_vol", "maxdprc", "prcvol", "stdprcvol", "beta2",
-                      "std_turn", "GPRD", "GPRD_MA7", "GPRD_MA30", "nsi"], axis=1)
+#data = data.drop(["illiq", "std_vol", "maxdprc", "stdprcvol", "beta2",
+#                      "std_turn", "GPRD", "GPRD_MA7", "GPRD_MA30", "nsi"], axis=1)
 
-print(data_x.columns)
-print(len(data_x.columns))   # 32 characteristics
+data = data.drop(["std_vol", "maxdprc", "stdprcvol", "beta2", "volscaled", "logvol",
+                  "std_turn",  "GPRD_MA7", "GPRD_MA30", 'nsi'], axis=1)
 
-# Regressions
 
-start_time = time.time()
+# Rescale columns as per Kelly. Omit news factors!
+#not_transform = ['ret_excess', 'GPRD', 'GPRD_MA7', 'GPRD_MA30', 'nsi']
+not_transform = ['ret_excess', 'GPRD']
+to_transform = data.drop(columns=not_transform)
+to_keep = data[not_transform]
+
+# Apply the transform only to the other columns
+transformed = to_transform.groupby(level='date').transform(new_ipca_utils.rank_scale)
+
+# Recombine columns
+data = pd.concat([transformed, to_keep], axis=1)
+
+print("Final list of characteristics (exclude ret_excess): ")
+print(data.columns)
+
+######################################################################################
+## RUN THE MODEL
+######################################################################################
 
 K = int(sys.argv[1])
+mintol = 1e-6
 
+model = ipca_pruitt.ipca(RZ=data, return_column='ret_excess', add_constant=False)
 
-# Define hyperparameter grid
-alpha_grid = [1, 5, 10, 25]
-l1_ratio_grid = [0.0, 0.5, 1.0]  # ridge, elastic net, lasso
+print(f"Running model with {K} factors, minTol = {mintol}")
 
-# Collect results here
-results = []
+model_fit = model.fit(K=K,
+                      OOS = False,
+                      gFac=None,
+                      dispIters=True,
+                      dispItersInt=25,
+                      minTol=mintol,
+                      maxIters=10000)
 
-for alpha, l1_ratio in product(alpha_grid, l1_ratio_grid):
-    print(f"\nFitting IPCA with K={K}, alpha={alpha}, l1_ratio={l1_ratio}")
-
-    regr = ipca.InstrumentedPCA(
-        n_factors=K,
-        intercept=False,
-        alpha=alpha,
-        l1_ratio=l1_ratio,
-        max_iter=2500,
-        iter_tol=1e-6,
-        n_jobs=-1,
-        backend='loky'
-    )
-
-    # Fit model
-    regr = regr.fit(X=data_x, y=data_y, data_type="panel")
-
-    # Compute scores
-    R2_total = regr.score(X=data_x, y=data_y)
-    R2_pred = regr.score(X=data_x, y=data_y, mean_factor=True)
-
-    print(f"alpha={alpha}, l1_ratio={l1_ratio} : R2_total={R2_total:.4f}, R2_pred={R2_pred:.4f}")
-
-    # Append result
-    results.append({
-        "K": K,
-        "alpha": alpha,
-        "l1_ratio": l1_ratio,
-        "R2_total": R2_total,
-        "R2_pred": R2_pred 
-    })
-
-# Convert to DataFrame and display sorted table
-results_df = pd.DataFrame(results).sort_values(by="R2_pred", ascending=False)
-
-print("\n=== IPCA Grid Search Results ===")
-print(results_df.to_string(index=False))
-
-
-
+print(f"Total R2: {model_fit['rfits']['R2_Total']:.4f}")
+print(f"Predictive R2: {model_fit['rfits']['R2_Pred']:.4f}")

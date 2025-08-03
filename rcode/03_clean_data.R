@@ -5,12 +5,12 @@
 ###############################################################################
 
 
-libraries_used <- c("dplyr", "purrr", "zoo", "lubridate", "ggplot2")
+packages_used <- c("dplyr", "purrr", "zoo", "lubridate", "ggplot2")
 
-for (library_used in libraries_used) {
-  if (!require(library_used, character.only = TRUE)) {
-    install.packages(library_used)
-    library(library_used, character.only = TRUE)
+for (package_used in packages_used) {
+  if (!require(package_used, character.only = TRUE)) {
+    install.packages(package_used)
+    library(package_used, character.only = TRUE)
   }
 }
 

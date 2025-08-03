@@ -2,8 +2,17 @@
 # Descriptive statistics and data visualization
 ###############################################################################
 
+packages_used <- c("dplyr", "lubridate", "ggplot2")
+
+for (package_used in packages_used) {
+  if (!require(package_used, character.only = TRUE)) {
+    install.packages(package_used)
+    library(package_used, character.only = TRUE)
+  }
+}
+
 setwd(Sys.getenv("THESIS_DATA_DIR"))
-clean_data <- readRDS("data/coins_data.rda")
+clean_data <- readRDS("data/coins_data.rds")
 
 # Count observations per asset (on filtered data)
 observationsPerCoin <- clean_data %>%

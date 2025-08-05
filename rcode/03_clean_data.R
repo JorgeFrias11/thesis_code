@@ -4,8 +4,6 @@
 # - Saves cleaned dataset. 
 ###############################################################################
 
-.libPaths("~/R_LIBS")
-
 packages_used <- c("dplyr", "purrr", "zoo", "lubridate")
 
 for (package_used in packages_used) {
@@ -24,8 +22,8 @@ setwd(Sys.getenv("THESIS_DATA_DIR"))
 coindata <- readRDS("data/coin_raw_data.rds")
 
 summary(coindata)
-nrow(coindata)  
-length(unique(coindata$coinName))
+cat("Initial number of observations:", nrow(coindata), "\n")  
+cat("Initial number of unique coins:", length(unique(coindata$coinName)), "\n")
 
 ###############################################################################
 # Apply filters: remove small marketcap coins and coins without at least at 
@@ -93,8 +91,8 @@ sum(clean_data$ret < -.99, na.rm = T)
 clean_data <- clean_data %>%         
   mutate(ret = pmin(pmax(ret, -0.99), 5.0))  # trims to [-99%, +500%]
 
-cat("Total number of observations:", nrow(clean_data), "\n")                    
-cat("Number of unique coins:", length(unique(clean_data$coinName)), "\n")
+cat("Final number of observations:", nrow(clean_data), "\n")                    
+cat("Final number of unique coins:", length(unique(clean_data$coinName)), "\n")
 summary(clean_data)
 
 

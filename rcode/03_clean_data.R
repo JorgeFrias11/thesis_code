@@ -36,6 +36,15 @@ length(unique(coindata$coinName))
 # I remove the observation (fake or erroneous volume)
 ###############################################################################
 
+# Remove stablecoins, precious metal backed coins, and wrapped coins. 
+coin_name_files <- c("goldbacked_shortnames.txt", "stablecoins_shortnames.txt", 
+                     "wrappedcoins_shortnames.txt")
+
+coins_to_exclude <- unique(unlist(lapply(coin_name_files, readLines)))
+
+coindata <- coindata[!coindata$coinName %in% coins_to_exclude, ]
+
+
 # Apply filters
 clean_data <- coindata %>%
   filter(marketcap >= 1e6) %>%           # remove small marketcap coins (observations)

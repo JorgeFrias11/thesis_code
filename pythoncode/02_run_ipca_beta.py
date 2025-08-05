@@ -30,6 +30,7 @@ print(f"Predictive R2: {model_fit['rfits']['R2_Pred']:.4f}")
 ######################################################################################
 
 # Read Excel file (first sheet named "Sheet1")
+#gpr = pd.read_excel("/home/jfriasna/thesis_data/data_gpr_daily_recent.xlsx", sheet_name="Sheet1")
 gpr = pd.read_excel("/home/jori/Documents/QFIN/thesis_data/data_gpr_daily_recent.xlsx", sheet_name="Sheet1")
 # Convert 'date' column to datetime
 #gpr['date'] = pd.to_datetime(gpr['date'])

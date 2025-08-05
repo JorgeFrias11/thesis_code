@@ -18,7 +18,7 @@ for (library_used in libraries_used) {
 
 # Call full coin list endpoint. Max processable limit is 5000 
 # Get coin names
-allcoins_url <- "https://coincodex.com/api/v1/coins_compat/get_coin_list?limit=5000"
+allcoins_url <- "https://coincodex.com/api/v1/coins_compat/get_coin_list?limit=15000"
 stablecoins_url <- "https://coincodex.com/api/v1/coins_compat/get_coin_list?categories=stablecoins"
 
 # Parse

@@ -6,8 +6,8 @@ import ipca_pruitt
 import sys
 import pandas as pd
 
-#data = pd.read_pickle("/home/jfriasna/thesis_data/data/clean_daily_preds.pkl")
-data = pd.read_pickle("/home/jori/Documents/QFIN/thesis_data/data/clean_daily_preds.pkl")
+data = pd.read_pickle("/home/jfriasna/thesis_data/data/clean_daily_preds.pkl")
+#data = pd.read_pickle("/home/jori/Documents/QFIN/thesis_data/data/clean_daily_preds.pkl")
 
 K = int(sys.argv[1])
 mintol = 1e-6
@@ -30,7 +30,8 @@ print(f"Predictive R2: {model_fit['rfits']['R2_Pred']:.4f}")
 ######################################################################################
 
 # Read Excel file (first sheet named "Sheet1")
-gpr = pd.read_excel("/home/jori/Documents/QFIN/thesis_data/data_gpr_daily_recent.xlsx", sheet_name="Sheet1")
+gpr = pd.read_excel("/home/jfriasna/thesis_data/data_gpr_daily_recent.xlsx", sheet_name="Sheet1")
+#gpr = pd.read_excel("/home/jori/Documents/QFIN/thesis_data/data_gpr_daily_recent.xlsx", sheet_name="Sheet1")
 # Convert 'date' column to datetime
 #gpr['date'] = pd.to_datetime(gpr['date'])
 gpr['date'] = gpr['date'].dt.strftime('%Y%m%d').astype(int)

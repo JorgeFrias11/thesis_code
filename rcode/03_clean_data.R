@@ -4,8 +4,9 @@
 # - Saves cleaned dataset. 
 ###############################################################################
 
+.libPaths("~/R_LIBS")
 
-packages_used <- c("dplyr", "purrr", "zoo", "lubridate", "ggplot2")
+packages_used <- c("dplyr", "purrr", "zoo", "lubridate")
 
 for (package_used in packages_used) {
   if (!require(package_used, character.only = TRUE)) {
@@ -35,6 +36,14 @@ length(unique(coindata$coinName))
 # is not available, take the next one). If the ratio is still higher than 1, 
 # I remove the observation (fake or erroneous volume)
 ###############################################################################
+
+# Remove stablecoins, precious metal backed coins, and wrapped coins.
+coin_name_files <- c("goldbacked_shortnames.txt", "stablecoins_shortnames.txt",
+                     "wrappedcoins_shortnames.txt")
+
+coins_to_exclude <- unique(unlist(lapply(coin_name_files, readLines)))
+
+coindata <- coindata[!coindata$coinName %in% coins_to_exclude, ]
 
 # Apply filters
 clean_data <- coindata %>%

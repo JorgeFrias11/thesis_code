@@ -1,0 +1,10 @@
+## Setup Example
+# Need to install R packages before running the script
+~~
+mkdir ~/R_LIBS
+ml r-4.4.1-gcc-12.2.0-x6ecfp6 
+ml openmpi-4.1.4-xhgzf5w
+
+Rscript install.R
+sbatch mpi-atc.slurm 
+~~

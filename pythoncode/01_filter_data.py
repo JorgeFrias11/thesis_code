@@ -4,19 +4,19 @@ import pandas as pd
 
 # Add the parent of the parent directory to the Python path
 
-current_dir = Path().resolve()
-sys.path.append(str(current_dir.parents[1]))
+#current_dir = Path().resolve()
+#sys.path.append(str(current_dir.parents[1]))
 
 import ipca_utils
 
-#datapath = "/home/jfriasna/thesis_data/data/"
-datapath = "/home/jori/Documents/QFIN/thesis_data/data/"
+datapath = "/home/jfriasna/thesis_data/data/"
+#datapath = "/home/jori/Documents/QFIN/thesis_data/data/"
 data = ipca_utils.load_coindata('daily', datapath,
                                 cache_file = 'cache_daily_preds.pkl',
                                 daily_rds='daily_predictors.rds',
                                 ignore_cols=['logvol', 'nsi', 'GPRD', 'GPRD_MA7', 'GPRD_MA30'],
                                 pruitt=True,
-                                save = True)
+                                save = False)
 
 print(data.columns)
 
@@ -136,5 +136,5 @@ print("Final list of characteristics (excluding ret_excess): ")
 print(data.columns)
 
 # Save data
-#data.to_pickle("/home/jfriasna/thesis_data/data/clean_daily_preds.pkl")
-data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/clean_daily_preds.pkl")
+data.to_pickle("/home/jfriasna/thesis_data/data/clean_daily_preds.pkl")
+#data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/clean_daily_preds.pkl")

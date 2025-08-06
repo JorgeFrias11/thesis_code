@@ -3,7 +3,7 @@
 #SBATCH --job-name=ipca_beta
 #SBATCH --array=1-6   # Runs regs K = 1 to 6
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=60
+#SBATCH --cpus-per-task=40
 #SBATCH --mem=225G
 #SBATCH --partition=highmem
 

@@ -31,7 +31,7 @@ cat("Reading file...", "\n")
 
 coindata <- readRDS(file="data/coins_data.rds")
 all_vars_output_file <- "daily_predictors.rds"
-data_dir <- "data/"
+data_dir <- "data"
 #output_file <- "predictors2.rds"
 
 cat("Constructing predictors...", "\n")

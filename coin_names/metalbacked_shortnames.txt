@@ -9,3 +9,5 @@ quorium
 kinesis-gold
 kinesis-silver
 novem-nnn-gold-token
+silver-token-xagx
+silver-gram

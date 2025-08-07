@@ -52,38 +52,38 @@ print(data.columns)
 ## Period: 2020-01-01 to 2025-07-31
 ##################################################################################
 
-print("Number of coins:", len(data.index.get_level_values('coinName').unique()))
-
-# Step 1: Convert the integer date level to datetime
-date_ints = data.index.get_level_values('date')
-date_dt = pd.to_datetime(date_ints.astype(str), format="%Y%m%d")
-
-# Step 2: Mask for date range (2020-01-01 to 2025-07-31)
-start_date = pd.to_datetime("2020-01-01")
-end_date = pd.to_datetime("2025-07-31")
-mask = (date_dt >= start_date) & (date_dt <= end_date)
-
-# Step 3: Apply the mask to filter data
-data_in_range = data[mask]
-
-# Step 4: Compute how many unique dates exist in the range
-total_dates = date_dt[mask].unique()
-num_days = len(total_dates)
-
-# Step 5: Count number of observations per coin
-coin_counts = data_in_range.groupby(level='coinName').size()
-
-# Step 6: Keep coins with >= 75% of possible observations
-min_obs_required = int(0.75 * num_days)
-eligible_coins = coin_counts[coin_counts >= min_obs_required].index
-
-print("Total number of coins:", len(eligible_coins))
-
-# Step 7: Filter the data
-idx = pd.IndexSlice
-filtered_data = data_in_range.loc[idx[:, eligible_coins], :]
-
-data = filtered_data
+# print("Number of coins:", len(data.index.get_level_values('coinName').unique()))
+#
+# # Step 1: Convert the integer date level to datetime
+# date_ints = data.index.get_level_values('date')
+# date_dt = pd.to_datetime(date_ints.astype(str), format="%Y%m%d")
+#
+# # Step 2: Mask for date range (2020-01-01 to 2025-07-31)
+# start_date = pd.to_datetime("2020-01-01")
+# end_date = pd.to_datetime("2025-07-31")
+# mask = (date_dt >= start_date) & (date_dt <= end_date)
+#
+# # Step 3: Apply the mask to filter data
+# data_in_range = data[mask]
+#
+# # Step 4: Compute how many unique dates exist in the range
+# total_dates = date_dt[mask].unique()
+# num_days = len(total_dates)
+#
+# # Step 5: Count number of observations per coin
+# coin_counts = data_in_range.groupby(level='coinName').size()
+#
+# # Step 6: Keep coins with >= 75% of possible observations
+# min_obs_required = int(0.75 * num_days)
+# eligible_coins = coin_counts[coin_counts >= min_obs_required].index
+#
+# print("Total number of coins:", len(eligible_coins))
+#
+# # Step 7: Filter the data
+# idx = pd.IndexSlice
+# filtered_data = data_in_range.loc[idx[:, eligible_coins], :]
+#
+# data = filtered_data
 
 ##################################################################################
 # Following the code of Kelly et al. (2019), keep dates with a min cross-section of 100 coins

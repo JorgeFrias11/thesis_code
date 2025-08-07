@@ -86,6 +86,26 @@ print(data.columns)
 # data = filtered_data
 
 ##################################################################################
+# Get dates from 01-06-2018
+##################################################################################
+
+print("Number of coins:", len(data.index.get_level_values('coinName').unique()))
+
+# Convert the integer date level to datetime
+date_ints = data.index.get_level_values('date')
+date_dt = pd.to_datetime(date_ints.astype(str), format="%Y%m%d")
+
+# Mask for date range (2018-06-01 to 2025-07-31)
+start_date = pd.to_datetime("2018-06-01")
+end_date = pd.to_datetime("2025-07-31")
+mask = (date_dt >= start_date) & (date_dt <= end_date)
+
+# Filter the data
+data_in_range = data[mask]
+
+data = data_in_range
+
+##################################################################################
 # Following the code of Kelly et al. (2019), keep dates with a min cross-section of 100 coins
 ##################################################################################
 

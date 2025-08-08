@@ -16,7 +16,7 @@ data = ipca_utils.load_coindata('daily', datapath,
                                 daily_rds='daily_predictors.rds',
                                 ignore_cols=['logvol', 'nsi', 'GPRD', 'GPRD_MA7', 'GPRD_MA30'],
                                 pruitt=True,
-                                save = False)
+                                save = True)
 
 print(data.columns)
 
@@ -89,7 +89,7 @@ print(data.columns)
 # Get dates from 01-06-2018
 ##################################################################################
 
-print("Number of coins:", len(data.index.get_level_values('coinName').unique()))
+print("Number of coins in the full sample period:", len(data.index.get_level_values('coinName').unique()))
 
 # Convert the integer date level to datetime
 date_ints = data.index.get_level_values('date')
@@ -103,7 +103,27 @@ mask = (date_dt >= start_date) & (date_dt <= end_date)
 # Filter the data
 data_in_range = data[mask]
 
-data = data_in_range
+print("Number of coins in the reduced sample period:", len(data_in_range.index.get_level_values('coinName').unique()))
+
+# Compute number of unique dates in the range
+total_dates = date_dt[mask].unique()
+num_days = len(total_dates)
+
+# Step 5: Count number of observations per coin
+coin_counts = data_in_range.groupby(level='coinName').size()
+
+# Step 6: Keep coins with >= 75% of possible observations
+#min_obs_required = int(0.5 * num_days)
+min_obs_required = 730
+eligible_coins = coin_counts[coin_counts >= min_obs_required].index
+
+print("Total number of coins:", len(eligible_coins))
+
+# Step 7: Filter the data
+idx = pd.IndexSlice
+filtered_data = data_in_range.loc[idx[:, eligible_coins], :]
+
+data = filtered_data
 
 ##################################################################################
 # Following the code of Kelly et al. (2019), keep dates with a min cross-section of 100 coins

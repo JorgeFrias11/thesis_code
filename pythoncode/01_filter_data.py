@@ -16,7 +16,7 @@ data = ipca_utils.load_coindata('daily', datapath,
                                 daily_rds='daily_predictors.rds',
                                 ignore_cols=['logvol', 'nsi', 'GPRD', 'GPRD_MA7', 'GPRD_MA30'],
                                 pruitt=True,
-                                save = True)
+                                save = False )
 
 print(data.columns)
 

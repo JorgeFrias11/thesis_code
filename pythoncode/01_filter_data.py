@@ -109,19 +109,21 @@ print("Number of coins in the reduced sample period:", len(data_in_range.index.g
 total_dates = date_dt[mask].unique()
 num_days = len(total_dates)
 
-# Step 5: Count number of observations per coin
+# Count number of observations per coin
 coin_counts = data_in_range.groupby(level='coinName').size()
 
-# Step 6: Keep coins with >= 75% of possible observations
-#min_obs_required = int(0.5 * num_days)
+# Keep coins with at least two years of panel data
 min_obs_required = 730
 eligible_coins = coin_counts[coin_counts >= min_obs_required].index
 
 print("Total number of coins:", len(eligible_coins))
 
-# Step 7: Filter the data
+# Filter the data
 idx = pd.IndexSlice
 filtered_data = data_in_range.loc[idx[:, eligible_coins], :]
+
+filtered_data.to_pickle("/home/jfriasna/thesis_data/data/filtered_daily_panel.pkl")
+#filtered_data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/filtered_data.pkl")
 
 data = filtered_data
 
@@ -175,6 +177,6 @@ data = pd.concat([transformed, to_keep], axis=1)
 print("Final list of characteristics (excluding ret_excess): ")
 print(data.columns)
 
-# Save data
-data.to_pickle("/home/jfriasna/thesis_data/data/clean_daily_preds.pkl")
-#data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/clean_daily_preds.pkl")
+# Save the processed data for the empirical analysis
+data.to_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
+#data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/processed_daily_preds.pkl")

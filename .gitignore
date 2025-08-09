@@ -2,4 +2,5 @@
 *.log
 *.out
 logs/
-__pycache__/
+pythoncode/__pycache__/
+pythoncode/.idea/

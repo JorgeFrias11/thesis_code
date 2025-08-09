@@ -11,7 +11,7 @@ import ipca_utils
 
 datapath = "/home/jfriasna/thesis_data/data/"
 #datapath = "/home/jori/Documents/QFIN/thesis_data/data/"
-data = ipca_utils.load_coindata('daily', datapath,
+data, coin_id = ipca_utils.load_coindata('daily', datapath,
                                 cache_file = 'cache_daily_preds.pkl',
                                 daily_rds='daily_predictors.rds',
                                 ignore_cols=['logvol', 'nsi', 'GPRD', 'GPRD_MA7', 'GPRD_MA30'],

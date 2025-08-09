@@ -39,9 +39,9 @@ def load_coindata(freq, data_path, cache_file=None,
             print("Data will be read...")
             # Load from cache
             with open(cache_path, "rb") as f:
-                data = pickle.load(f)
+                data_load = pickle.load(f)
             print("Loaded data from cache.")
-            return data
+            return data_load['data'], data_load['coin_id']
 
     # Load from .rds file
     print("Cache not used or not found. Loading data from predictors.rds...")
@@ -99,7 +99,7 @@ def load_coindata(freq, data_path, cache_file=None,
     # Save preprocessed data to cache
     if save and cache_file is not None:
         with open(cache_path, "wb") as f:
-            pickle.dump(data, f)
+            pickle.dump({'data': data, 'coin_id': coin_id}, f)
         print("Data processed and cached.")
 
     return data, coin_id

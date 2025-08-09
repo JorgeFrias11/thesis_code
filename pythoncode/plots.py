@@ -20,62 +20,42 @@ coindata["date"] = pd.to_datetime(
     format="%Y%m%d"
 )
 
-#################### REMOVE EXTREMES MCAP
-btc_mcap = (
-    coindata[coindata["coinName"] == "bitcoin"]
-    .loc[:, ["date", "marketcap"]]
-    .rename(columns={"marketcap": "btc_marketcap"})
-)
-
-# Join BTC marketcap to all coins
-coins_vs_btc = coindata.merge(btc_mcap, on="date", how="left")
-
-# Filter for coins with higher marketcap than BTC (excluding BTC itself)
-coins_vs_btc = coins_vs_btc[
-    (coins_vs_btc["marketcap"] > coins_vs_btc["btc_marketcap"]) &
-    (coins_vs_btc["coinName"] != "bitcoin")
-]
-
-# Remove these observations from original data
-coindata_filtered = coindata.merge(
-    coins_vs_btc[["date", "coinName"]],
-    on=["date", "coinName"],
-    how="left",
-    indicator=True
-).query('_merge == "left_only"').drop(columns="_merge")
-
-# Identify the row to remove
-mask = (coindata_filtered["coinName"] == 480) & (coindata_filtered["date"] == pd.to_datetime("2021-10-22"))
-
-# Drop it
-coindata_filtered = coindata_filtered[~mask]
-
-coindata_filtered[['date', 'coinName', 'marketcap']].sort_values(by='marketcap', ascending=False)
-
-coindata = coindata_filtered.copy()
-###########################################
-
 data_mcap = coindata.groupby('date')['marketcap'].sum()
 
-# Plot
-plt.figure(figsize=(12,6))
-plt.plot(data_mcap.index, data_mcap.values, color='steelblue')
-plt.title('Total Market Cap Over Time')
-plt.xlabel('Date')
-plt.ylabel('Total Market Cap')
-plt.grid(True)
-plt.show()
-
-# Plot with two series
-# First series: sum of coin data
-plt.figure(figsize=(12, 6))
-plt.plot(data_mcap.index, data_mcap.values, color='steelblue', label='Total Market Cap (Coins)')
-# Second series: mktcap DataFrame
-plt.plot(mktcap['date'], mktcap['market_cap'], color='orange', label='External Market Cap')
-# Labels and legend
-plt.title('Total Market Cap Over Time')
-plt.xlabel('Date')
-plt.ylabel('Market Cap')
-plt.grid(True)
+# Plot of market capitalization
+plt.figure(figsize=(10, 6))
+plt.plot(data_mcap.index, data_mcap.values / 1e9, label='Sample market capitalization')
+# Second series: mktcap dataFrame fron CoinGecko
+plt.plot(mktcap['date'], mktcap['market_cap'] / 1e9, color='chocolate', alpha=0.75, linestyle='--', label='Total market capitalization')
+plt.ylabel('Market capitalization (Billion USD)')
+plt.grid(True, alpha=0.5)
 plt.legend()
 plt.show()
+
+# Boxplots
+# Observations per coin
+observations_per_coin = coindata.groupby('coinName').size().reset_index(name='n_obs')
+
+# Boxplot
+plt.figure(figsize=(6, 6))
+plt.boxplot(observations_per_coin['n_obs'],
+            notch=True,
+            patch_artist=True,
+            boxprops=dict(facecolor='lightblue'),
+            flierprops=dict(marker='o', markerfacecolor='black', markersize=5, linestyle='none'),
+            showfliers=True
+            )
+
+plt.ylabel("Number of observations")
+plt.yticks(range(0, observations_per_coin['n_obs'].max() + 500, 500))
+plt.grid(axis='y', alpha=0.5)
+plt.show()
+
+
+observations_per_coin.max()
+observations_per_coin.sort_values(by='n_obs', ascending=False)
+
+observations_per_coin[observations_per_coin['coinName'] == 151]
+
+coin_name_400 = next(name for name, cid in coin_id.items() if cid == 151)
+print(coin_name_400)

@@ -21,9 +21,30 @@ setwd(Sys.getenv("THESIS_DATA_DIR"))
 
 coindata <- readRDS("data/coin_raw_data.rds")
 
-summary(coindata)
 cat("Initial number of observations:", nrow(coindata), "\n")  
 cat("Initial number of unique coins:", length(unique(coindata$coinName)), "\n")
+
+
+###############################################################################
+# Remove observations with extreme market capitalization
+# Two coins in my dataset - flow and cryncoin - have extreme (fake) mktcap. 
+# I remove those observations, which excludes cryncoin completely. 
+# To do it, I exclude observations that have a larger mcap than bitcoin. 
+# Cloce price and volume seem OK. 
+###############################################################################
+
+btc_mcap <- coindata %>%
+  ungroup() %>%
+  filter(coinName == "bitcoin") %>%
+  select(date, btc_marketcap = marketcap, -coinName) 
+
+# Join BTC mktcap to all coins and compare
+coins_vs_btc <- coindata %>%
+  left_join(btc_mcap, by = "date") %>%
+  filter(marketcap > btc_marketcap, coinName != "bitcoin")
+
+coindata <- coindata %>%
+  anti_join(coins_vs_btc, by = c("date", "coinName"))
 
 ###############################################################################
 # Apply filters: remove small marketcap coins and coins without at least at 
@@ -90,6 +111,7 @@ sum(clean_data$ret < -.99, na.rm = T)
 # Trim ourliers
 clean_data <- clean_data %>%         
   mutate(ret = pmin(pmax(ret, -0.99), 5.0))  # trims to [-99%, +500%]
+
 
 cat("Final number of observations:", nrow(clean_data), "\n")                    
 cat("Final number of unique coins:", length(unique(clean_data$coinName)), "\n")

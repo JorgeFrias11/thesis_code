@@ -102,7 +102,7 @@ def load_coindata(freq, data_path, cache_file=None,
             pickle.dump(data, f)
         print("Data processed and cached.")
 
-    return data
+    return data, coin_id
 
 
 # def rank_scale(x):

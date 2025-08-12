@@ -66,7 +66,7 @@ coindata <- coindata[!coindata$coinName %in% coins_to_exclude, ]
 
 # Apply filters
 clean_data <- coindata %>%
-  filter(marketcap >= 1e6) %>%           # remove small marketcap coins (observations)
+  filter(marketcap >= 1e6) %>%           # remove small mcap coins, less than a million
   group_by(coinName) %>%
   mutate(
     #volume = if_else(volume / marketcap > 1, NA_real_, volume),

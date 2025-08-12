@@ -15,7 +15,7 @@ setwd(Sys.getenv("THESIS_DATA_DIR"))
 coindata <- readRDS("data/coins_data.rds")
 
 # Count observations per asset (on filtered data)
-observationsPerCoin <- clean_data %>%
+observationsPerCoin <- coindata %>%
   group_by(coinName) %>%
   summarise(n_obs = n(), .groups = "drop")
 
@@ -31,7 +31,7 @@ axis(side = 2, at = seq(0, max(observationsPerCoin$n_obs), by = 500))
 #      side = 1, line = 2)
 
 
-assets_per_year <- clean_data %>%
+assets_per_year <- coindata %>%
   mutate(year = year(date)) %>%
   group_by(year) %>%
   summarise(n_assets = n_distinct(coinName), .groups = "drop")
@@ -39,13 +39,24 @@ assets_per_year <- clean_data %>%
 # Plot
 ggplot(assets_per_year, aes(x = factor(year), y = n_assets)) +
   geom_col() +
-  geom_text(aes(label = n_assets), vjust = -0.5, size = 6) +
+  geom_text(aes(label = n_assets), vjust = -0.5, size = 3.5) +
   labs(
     x = "Year",
-    y = "Number of coins"
+    y = "Number of unique coins"
   ) +
-  scale_y_continuous(breaks = seq(0, 7) * 250) +
-  theme_bw(base_size = 18)   # increases all text sizes simply
+  scale_y_continuous(
+    breaks = seq(0, 1400, 250),
+    limits = c(0, 1400)
+  ) +
+  theme_bw(base_size = 12) +
+  theme(
+    axis.text.x = element_text(color = "black"),
+    axis.text.y = element_text(color = "black"), 
+    axis.title.x = element_text(size = 10),  # axis labels size
+    axis.title.y = element_text(size = 10)   
+  )
+
+# ANtes, size 5 y base size =16
 
 # ggplot(assets_per_year, aes(x = factor(year), y = n_assets)) +
 #   geom_col() +
@@ -62,12 +73,16 @@ ggplot(assets_per_year, aes(x = factor(year), y = n_assets)) +
 
 
 # Plot time series of number of coins
-assets_per_day <- clean_data %>%
+assets_per_day <- coindata %>%
   group_by(date) %>%
   summarise(n_assets = n_distinct(coinName), .groups = "drop")
 
+# There is an outlier in this date, likely an error in the data. 
+assets_per_day <- assets_per_day %>%
+  mutate(n_assets = ifelse(date == as.Date("2020-09-17"), lag(n_assets), n_assets))
+
 ggplot(assets_per_day, aes(x = date, y = n_assets)) +
-  geom_line(color = "steelblue", size = 1) +
+  geom_line(color = "steelblue", linewidth = 1) +
   scale_x_date(
     date_breaks = "1 year",
     date_labels = "%Y"
@@ -77,10 +92,17 @@ ggplot(assets_per_day, aes(x = date, y = n_assets)) +
   ) +
   labs(
     x = "Year",
-    y = "Number of Coins",
+    y = "Number of unique coins",
   ) +
-  theme_bw(base_size = 14) 
+  theme_bw(base_size = 12) +
+  theme(
+    axis.text.x = element_text(color = "black"),
+    axis.text.y = element_text(color = "black"), 
+    axis.title.x = element_text(size = 10),  # axis labels size
+    axis.title.y = element_text(size = 10)   
+  )
 
+length(unique(coindata$coinName))
 
 ###############################################################################
 # Descriptive statistics and data visualization of the filtered data
@@ -115,7 +137,7 @@ mktcap$snapped_at <- as.POSIXct(mktcap$snapped_at / 1000,
                                 tz = "UTC")
 names(mktcap)[1] <- "date"
 
-head(clean_data)
+head(coindata)
 
 
 

@@ -4,6 +4,7 @@
 
 import pandas as pd
 import ipca_utils
+import pickle
 
 #datapath = "/home/jfriasna/thesis_data/data/"
 datapath = "/home/jori/Documents/QFIN/thesis_data/data/"
@@ -46,7 +47,7 @@ coin_counts = data_in_range.groupby(level='coinName').size()
 
 # Step 6: Keep coins with >= 75% of possible observations
 #min_obs_required = int(0.5 * num_days)
-min_obs_required = 730
+min_obs_required = 365
 eligible_coins = coin_counts[coin_counts >= min_obs_required].index
 
 print("Total number of coins:", len(eligible_coins))
@@ -55,7 +56,7 @@ print("Total number of coins:", len(eligible_coins))
 idx = pd.IndexSlice
 filtered_data = data_in_range.loc[idx[:, eligible_coins], :]
 
-filtered_data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/filtered_daily_preds.pkl")
+filtered_data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/filtered_365_preds.pkl")
 
 data = filtered_data
 

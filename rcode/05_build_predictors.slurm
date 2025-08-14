@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=build_pred
-#SBATCH --output=logs/05_build.log
-#SBATCH --error=logs/05_build.log
+#SBATCH --output=logs/05_build_100mill.log
+#SBATCH --error=logs/05_build_100mill.log
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=60
 #SBATCH --mem=250G

@@ -29,8 +29,8 @@ start_time <- Sys.time()
 
 cat("Reading file...", "\n")
 
-coindata <- readRDS(file="data/coins_data.rds")
-all_vars_output_file <- "daily_predictors.rds"
+coindata <- readRDS(file="data/coins_data_100mill.rds")
+all_vars_output_file <- "daily_predictors_100mill.rds"
 data_dir <- "data"
 #output_file <- "predictors2.rds"
 

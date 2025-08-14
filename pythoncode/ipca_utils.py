@@ -200,8 +200,9 @@ def plot_gamma(gamma, save=False, file="gamma_plot.png"):
 
 
 # Main IPCA function with intercept (alpha)
-def run_ipca_alpha(data_x, data_y, K, save=False, out_path="output",
-             max_iter=250, bootstrap_draws=10, n_jobs=-1):
+def run_ipca_alpha(data_x, data_y, K, max_iter=250, iter_tol=1e-06, 
+                   bootstrap_draws=10, n_jobs=-1, 
+                   save=False, out_path="output"):
 
     out_path = Path(out_path)
     out_path.mkdir(parents=True, exist_ok=True)
@@ -216,13 +217,15 @@ def run_ipca_alpha(data_x, data_y, K, save=False, out_path="output",
             results_alpha = pickle.load(f)
     else:
         print("Running model:")
-        regr = InstrumentedPCA(n_factors=K, intercept=True, max_iter=max_iter)
+        regr = InstrumentedPCA(n_factors=K, intercept=True, max_iter=max_iter,
+                               iter_tol=iter_tol, n_jobs=n_jobs)
         regr = regr.fit(X=data_x, y=data_y, data_type="panel")
-        pval_alpha = regr.BS_Walpha(ndraws=bootstrap_draws, n_jobs=n_jobs)
         gamma, factors = regr.get_factors(label_ind=True)
         print("IPCA done! Getting scores...\n")
         r2_total = regr.score(X=data_x, y=data_y)
         r2_pred = regr.score(X=data_x, y=data_y, mean_factor=True)
+        # bootstrap
+        pval_alpha = regr.BS_Walpha(ndraws=bootstrap_draws, n_jobs=n_jobs)
 
         results_alpha = {
             'model': regr,
@@ -246,8 +249,9 @@ def run_ipca_alpha(data_x, data_y, K, save=False, out_path="output",
 
 
 # Main IPCA without intercept. Estimations of beta
-def run_ipca_beta(data_x, data_y, K, save=False, out_path="output",
-                       max_iter=250, bootstrap_draws=10, n_jobs=-1):
+def run_ipca_beta(data_x, data_y, K, max_iter=250, iter_tol=1e-06, 
+                  bootstrap_draws=10, n_jobs=-1, 
+                  save=False, out_path="output"):
 
     out_path = Path(out_path)
     out_path.mkdir(parents=True, exist_ok=True)
@@ -263,7 +267,8 @@ def run_ipca_beta(data_x, data_y, K, save=False, out_path="output",
         regr = results_beta['model']
     else:
         print("Running model:")
-        regr = InstrumentedPCA(n_factors=K, intercept=False, max_iter=max_iter)
+        regr = InstrumentedPCA(n_factors=K, intercept=False, max_iter=max_iter,
+                               iter_tol=iter_tol, n_jobs=n_jobs)
         regr = regr.fit(X=data_x, y=data_y, data_type="panel")
         gamma, factors = regr.get_factors(label_ind=True)
         r2_total = regr.score(X=data_x, y=data_y)

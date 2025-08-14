@@ -6,7 +6,7 @@ import ipca_pruitt
 import sys
 import pandas as pd
 
-data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
+data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds_100mill.pkl")
 #data = pd.read_pickle("/home/jori/Documents/QFIN/thesis_data/data/processed_daily_preds.pkl")
 
 print(f"Base model results:")

@@ -1,0 +1,4 @@
+{
+    "interactiveWindow.executeWithShiftEnter": false,
+    "python.languageServer": "Default" or "Pylance"
+}

@@ -5,9 +5,13 @@
 import ipca_pruitt
 import sys
 import pandas as pd
+import pickle
+from timeit import default_timer as timer
 
-data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds_100mill.pkl")
+data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
 # data = pd.read_pickle("/home/jori/Documents/QFIN/thesis_data/data/processed_daily_preds.pkl")
+
+starttime = timer()
 
 print(f"Base model results:")
 
@@ -27,17 +31,14 @@ model_fit = model.fit(K=K,
 print(f"Total R2: {model_fit['rfits']['R2_Total']:.4f}")
 print(f"Predictive R2: {model_fit['rfits']['R2_Pred']:.4f}")
 
-model_fit['Gamma']
-model_fit['Factor']
-
 # Run the bootstrap
-
+print("\nStarting bootstrap for each characteristic: \n")
 n_chars = model.X.shape[0]
 pvalues_beta = []
-n_chars = 2
+# 1000 draws following Kelly et al. (2019)
 for i in range(n_chars):
     print(f"Testing significance of characteristic {i + 1} of {n_chars}...")
-    pval = model.BS_Wbeta([i], ndraws=5, n_jobs=3, minTol=1e-2)
+    pval = model.BS_Wbeta([i], ndraws=1000, n_jobs=-1, minTol=mintol)
     pvalues_beta.append(pval)
 
 pval_df = pd.DataFrame({
@@ -45,9 +46,25 @@ pval_df = pd.DataFrame({
     'pval_beta': pvalues_beta
 })
 
-print()
+print("p-values for each asset characteristic: \n\n", pval_df)
 
-output_dir = '/home/jfriasna/thesis_output/reg_beta/'
+# Save results
 
-pval_df.to_csv(output_dir, index=False)
-print(f"Bootstrap results saved to {output_dir}")
+output_file_pvalues = f'/home/jfriasna/thesis_output/reg_beta/{K}_factors_pvals.csv'
+pval_df.to_csv(output_file_pvalues, index=False)
+print(f"\n\nBootstrap p-values saved in {output_file_pvalues}")
+
+save_obj = {
+    "model_fit": model_fit,
+    "chars_pval": pval_df
+}
+
+output_file = f'/home/jfriasna/thesis_output/reg_beta/{K}_factors_ipca.pkl'
+with open(output_file, "wb") as f:
+    pickle.dump(save_obj, f)
+print(f"\Results results saved in {output_file}")
+
+
+time = round(timer() - starttime, 2)
+
+print(f"\nCode finished after {time} seconds")

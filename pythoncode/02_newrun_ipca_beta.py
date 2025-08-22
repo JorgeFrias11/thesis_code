@@ -11,11 +11,7 @@ from timeit import default_timer as timer
 data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
 # data = pd.read_pickle("/home/jori/Documents/QFIN/thesis_data/data/processed_daily_preds.pkl")
 
-<<<<<<< HEAD
-fitstart = timer()
-=======
 starttime = timer()
->>>>>>> fa4944c47ab8828cc24fa1ea2f8bba43af188cc2
 
 print(f"Base model results:")
 
@@ -30,31 +26,32 @@ model_fit = model.fit(K=K,
                       dispIters=True,
                       dispItersInt=25,
                       minTol=mintol,
-                      maxIters=5000)
+                      maxIters=2500)
 
 print(f"Total R2: {model_fit['rfits']['R2_Total']:.4f}")
 print(f"Predictive R2: {model_fit['rfits']['R2_Pred']:.4f}")
 
 # Run the bootstrap
-print("\nStarting bootstrap for each characteristic: \n")
-n_chars = model.X.shape[0]
+#print("\nStarting bootstrap for each characteristic: \n")
+print("\nStarting bootstrap for prc and r14_0: \n")
+n_chars = [3, 5]
 pvalues_beta = []
 # 1000 draws following Kelly et al. (2019)
-for i in range(n_chars):
-    print(f"Testing significance of characteristic {i + 1} of {n_chars}: {model.X.index[i]}...")
+for i in n_chars:
+    print(f"Testing significance of characteristic {i + 1}: {model.X.index[i]}...")
+    #pval = model.BS_Wbeta([i], ndraws=1000, n_jobs=-1, minTol=mintol)
     pval = model.BS_Wbeta([i], ndraws=1000, n_jobs=-1, minTol=mintol)
     pvalues_beta.append(pval)
 
 pval_df = pd.DataFrame({
-    'characteristic': model.X.index,
+    'characteristic': model.X.index[[3, 5]],
     'pval_beta': pvalues_beta
 })
 
 print("p-values for each asset characteristic: \n\n", pval_df)
 
 # Save results
-
-output_file_pvalues = f'/home/jfriasna/thesis_output/reg_beta/compute_{K}_factors_pvals.csv'
+output_file_pvalues = f'/home/jfriasna/thesis_output/reg_beta/extra/extra_compute_{K}_factors_pvals.csv'
 pval_df.to_csv(output_file_pvalues, index=False)
 print(f"\n\nBootstrap p-values saved in {output_file_pvalues}")
 
@@ -63,10 +60,11 @@ save_obj = {
     "chars_pval": pval_df
 }
 
-output_file = f'/home/jfriasna/thesis_output/reg_beta/compute_{K}_factors_ipca.pkl'
+output_file = f'/home/jfriasna/thesis_output/reg_beta/extra/extra_compute_{K}_factors_ipca.pkl'
 with open(output_file, "wb") as f:
     pickle.dump(save_obj, f)
 print(f"\nResults results saved in {output_file}")
+
 
 time = round(timer() - starttime, 2)
 

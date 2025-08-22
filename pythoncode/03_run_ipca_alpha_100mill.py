@@ -8,7 +8,7 @@ import pandas as pd
 import pickle
 from timeit import default_timer as timer
 
-data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
+data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds_100mill.pkl")
 # data = pd.read_pickle("/home/jori/Documents/QFIN/thesis_data/data/processed_daily_preds.pkl")
 
 starttime = timer()
@@ -44,7 +44,7 @@ save_obj = {
 }
 
 # Save file
-output_file = f'/home/jfriasna/thesis_output/reg_alpha/{K}_factors_ipca.pkl'
+output_file = f'/home/jfriasna/thesis_output/reg_alpha/data_100mill/{K}_factors_ipca.pkl'
 with open(output_file, "wb") as f:
     pickle.dump(save_obj, f)
 

@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --output=/dev/null
 #SBATCH --job-name=ipca_alpha
-#SBATCH --array=1-6   # Runs regs K = 1 to 6
+#SBATCH --array=1-7   # Runs regs K = 1 to 7
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=40
-#SBATCH --mem=225G
+#SBATCH --mem=300G
 #SBATCH --partition=highmem
 
 # Load necessary modules 
@@ -21,7 +21,7 @@ export PYTHONPATH=/home/jfriasna/thesis_code/pythoncode:$PYTHONPATH
 timestamp=$(date +%Y-%m-%d_%H-%M-%S)
 
 # Redirect output and error
-exec > logs/data_100mill/alpha/ipca_K${SLURM_ARRAY_TASK_ID}_${timestamp}.out 2>&1
+exec > logs/reg_alpha/ipca_K${SLURM_ARRAY_TASK_ID}_${timestamp}.out 2>&1
 #exec 2> testlogs/reg_ipca_K${SLURM_ARRAY_TASK_ID}_${timestamp}.err
 
 # Run your script, unbuffered -u to display output on the go

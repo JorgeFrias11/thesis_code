@@ -8,14 +8,12 @@ import pandas as pd
 import pickle
 from timeit import default_timer as timer
 
-data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
+data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds_100mill.pkl")
 # data = pd.read_pickle("/home/jori/Documents/QFIN/thesis_data/data/processed_daily_preds.pkl")
 
-<<<<<<< HEAD
-fitstart = timer()
-=======
 starttime = timer()
->>>>>>> fa4944c47ab8828cc24fa1ea2f8bba43af188cc2
+
+print("Using 120 cpus and 950GB of memory... \n")
 
 print(f"Base model results:")
 
@@ -54,7 +52,7 @@ print("p-values for each asset characteristic: \n\n", pval_df)
 
 # Save results
 
-output_file_pvalues = f'/home/jfriasna/thesis_output/reg_beta/compute_{K}_factors_pvals.csv'
+output_file_pvalues = f'/home/jfriasna/thesis_output/reg_beta/data_100mill/compute_{K}_factors_pvals.csv'
 pval_df.to_csv(output_file_pvalues, index=False)
 print(f"\n\nBootstrap p-values saved in {output_file_pvalues}")
 
@@ -63,10 +61,11 @@ save_obj = {
     "chars_pval": pval_df
 }
 
-output_file = f'/home/jfriasna/thesis_output/reg_beta/compute_{K}_factors_ipca.pkl'
+output_file = f'/home/jfriasna/thesis_output/reg_beta/data_100mill/compute_{K}_factors_ipca.pkl'
 with open(output_file, "wb") as f:
     pickle.dump(save_obj, f)
 print(f"\nResults results saved in {output_file}")
+
 
 time = round(timer() - starttime, 2)
 

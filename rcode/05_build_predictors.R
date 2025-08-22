@@ -29,8 +29,8 @@ start_time <- Sys.time()
 
 cat("Reading file...", "\n")
 
-coindata <- readRDS(file="data/coins_data_100mill.rds")
-all_vars_output_file <- "daily_predictors_100mill.rds"
+coindata <- readRDS(file="data/coins_data.rds")
+all_vars_output_file <- "daily_predictors.rds"
 data_dir <- "data"
 #output_file <- "predictors2.rds"
 
@@ -46,7 +46,7 @@ cat("Constructing size (1/7)...", "\n")
 coindata <- coindata %>%
   group_by(coinName) %>%
   mutate(mcap = log(marketcap),
-         prc = log(lag(close)), 
+         prc = log(close), 
          maxdprc = slide_dbl(close, max, .before = 6L, .complete = TRUE))
 
 
@@ -94,6 +94,10 @@ coindata <- coindata %>%
   mutate(r7_0 = slide_dbl(.x = ret,
                           .f = Return.cumulative,
                           .before = 6L,
+                          .complete = TRUE),
+         r14_0 = slide_dbl(.x = ret,
+                          .f = Return.cumulative,
+                          .before = 13L,
                           .complete = TRUE),
          r21_0 = slide_dbl(.x = ret,
                           .f = Return.cumulative,
@@ -185,6 +189,9 @@ tbill <- DGS1MO
 
 # Risk-Free rate.  Fill NAs with previous obs and convert to dataframe
 r_f <- na.locf(tbill["2013-12-31/2025-07-31"])[-1] / 100  
+# Convert annualized yield into daily rate (252 trading days)
+r_f <- (1 + r_f)^(1/252) - 1
+
 r_f <- data.frame(date = index(r_f), rf = as.numeric(r_f))
 
 # Crypto daily market return
@@ -341,14 +348,14 @@ illiq <- function(return, volume){
   mean(abs(return)/volume)
 }
 
-# Last day's trading volume over the current supply in $ (market capitalization)
+# trading volume over market capitalization
 turnover <- function(volume, marketcap){
   dplyr::lag(volume) / marketcap
 }
 
 
-std_turn <- function(dto){
-  sd(dto)
+std_turn <- function(turnover){
+  sd(turnover)
 }
 
 
@@ -448,9 +455,9 @@ coindata <- coindata %>%
   group_by(coinName) %>%
   mutate(
     skew_7d = slide_dbl(ret, skewness, .before = 6L, .complete = TRUE),
-    skew_29d = slide_dbl(ret, skewness, .before = 29L, .complete = TRUE),
+    skew_30d = slide_dbl(ret, skewness, .before = 29L, .complete = TRUE),
     kurt_7d = slide_dbl(ret, kurtosis, .before = 6L, .complete = TRUE),
-    kurt_29d = slide_dbl(ret, kurtosis, .before = 29L, .complete = TRUE),
+    kurt_30d = slide_dbl(ret, kurtosis, .before = 29L, .complete = TRUE),
     maxret_7d = slide_dbl(ret, max, .before = 6L, .complete = TRUE),
     maxret_30d = slide_dbl(ret, max, .before = 29L, .complete = TRUE),
     minret_7d = slide_dbl(ret, min, .before = 6L, .complete = TRUE), 

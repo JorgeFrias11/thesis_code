@@ -10,12 +10,10 @@ for (pkg in packages_used) {
 }
 
 # Install package pcaMethods
-if (!require("pcaMethods", character.only = TRUE)) {
-  if (!require("BiocManager", quietly = TRUE)) {
-    install.packages("BiocManager")
-  }
-  BiocManager::install(pkg, ask = FALSE, update = FALSE)
-}
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("pcaMethods")
 
 library("pcaMethods", character.only = TRUE)
 

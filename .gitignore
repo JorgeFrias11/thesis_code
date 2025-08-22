@@ -4,3 +4,4 @@
 logs/
 pythoncode/__pycache__/
 pythoncode/.idea/
+.Rproj.user

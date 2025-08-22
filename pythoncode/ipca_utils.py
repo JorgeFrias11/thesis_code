@@ -141,7 +141,7 @@ def plot_gamma(gamma, save=False, file="gamma_plot.png"):
 
     # Code to group and plot, adding colors to each group
     group_dict = {
-        "core": ["mcap", "prc", "r14_1", "r21_1", "r30_1", "r30_14"],
+        "core": ["mcap", "prc", "r21_1", "r30_1", "r30_14"],
         "volrisk": ["beta", "ivol", "rvol", "retvol", "var", "delay"],
         "activity": ["lvol", "volscaled", "turn", "std_vol", "cv_vol"],
         "liquidity": ["bidask", "illiq", "sat", "dto", "volsh_30d"],

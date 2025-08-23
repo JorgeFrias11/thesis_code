@@ -32,9 +32,8 @@ print(f"Total R2: {model_fit['rfits']['R2_Total']:.4f}")
 print(f"Predictive R2: {model_fit['rfits']['R2_Pred']:.4f}")
 
 # Run the bootstrap
-#print("\nStarting bootstrap for each characteristic: \n")
-print("\nStarting bootstrap for prc and r14_0: \n")
-n_chars = [3, 5]
+print("\nStarting bootstrap for each characteristic: \n")
+n_chars = range(0, 20)
 pvalues_beta = []
 # 1000 draws following Kelly et al. (2019)
 for i in n_chars:
@@ -44,14 +43,14 @@ for i in n_chars:
     pvalues_beta.append(pval)
 
 pval_df = pd.DataFrame({
-    'characteristic': model.X.index[[3, 5]],
+    'characteristic': model.X.index[0: 20],
     'pval_beta': pvalues_beta
 })
 
 print("p-values for each asset characteristic: \n\n", pval_df)
 
 # Save results
-output_file_pvalues = f'/home/jfriasna/thesis_output/reg_beta/extra/extra_compute_{K}_factors_pvals.csv'
+output_file_pvalues = f'/home/jfriasna/thesis_output/new_reg_beta/{K}_factors_pvals_1_20.csv'
 pval_df.to_csv(output_file_pvalues, index=False)
 print(f"\n\nBootstrap p-values saved in {output_file_pvalues}")
 
@@ -60,7 +59,7 @@ save_obj = {
     "chars_pval": pval_df
 }
 
-output_file = f'/home/jfriasna/thesis_output/reg_beta/extra/extra_compute_{K}_factors_ipca.pkl'
+output_file = f'/home/jfriasna/thesis_output/new_reg_beta/{K}_factors_ipca_1_20.pkl'
 with open(output_file, "wb") as f:
     pickle.dump(save_obj, f)
 print(f"\nResults results saved in {output_file}")

@@ -1,12 +1,10 @@
 #!/bin/bash
 #SBATCH --output=/dev/null
-#SBATCH --job-name=3-6_alpha
-#SBATCH --array=3-6   # Runs regs K = 1 to 6
+#SBATCH --job-name=factors_reg
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=120
-#SBATCH --mem=400G
+#SBATCH --mem=120G
 #SBATCH --partition=compute
-##SBATCH --nodelist=clustercompute12
 
 # Load necessary modules 
 module purge
@@ -22,8 +20,7 @@ export PYTHONPATH=/home/jfriasna/thesis_code/pythoncode:$PYTHONPATH
 timestamp=$(date +%Y-%m-%d_%H-%M-%S)
 
 # Redirect output and error
-exec > logs/reg_alpha/ipca_K${SLURM_ARRAY_TASK_ID}_${timestamp}.out 2>&1
-#exec 2> testlogs/reg_ipca_K${SLURM_ARRAY_TASK_ID}_${timestamp}.err
+exec > logs/04_reg_obsfactors.out 2>&1
 
-# Run your script, unbuffered -u to display output on the go
-srun python -u 03_run_ipca_alpha.py $SLURM_ARRAY_TASK_ID
+# Run script unbuffered -u to display output 
+srun python -u 04_ipca_obsfactors.py $SLURM_ARRAY_TASK_ID

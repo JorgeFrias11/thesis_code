@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --output=/dev/null
-#SBATCH --array=4   # 4 jobs, chunks of 10 chars each
+#SBATCH --array=1-5   # 5 jobs, each chunk 4 characteristics
 #SBATCH --nodes=1
 #SBATCH --job-name=6_beta
-#SBATCH --cpus-per-task=100
-#SBATCH --mem=850G
-#SBATCH --partition=highmem
+#SBATCH --cpus-per-task=120
+#SBATCH --mem=450G
+#SBATCH --partition=compute
 
 # DEFINE K!
 K=6
@@ -23,10 +23,15 @@ export PYTHONPATH=/home/jfriasna/thesis_code/pythoncode:$PYTHONPATH
 # Get timestamp
 timestamp=$(date +%Y-%m-%d_%H-%M-%S)
 
-# Chunk size
-CHUNK=10
-START=$(( SLURM_ARRAY_TASK_ID * CHUNK ))
+# Chunk size: run 4 bootstraps in each task
+CHUNK=4
+START=$(( 20 + ( (SLURM_ARRAY_TASK_ID - 1) * CHUNK ) ))
 END=$(( START + CHUNK ))
+
+# Chunk size
+#CHUNK=10
+#START=$(( SLURM_ARRAY_TASK_ID * CHUNK ))
+#END=$(( START + CHUNK ))
 
 # Cap END at 41 (exclusive upper bound)
 if [ $END -gt 41 ]; then
@@ -34,7 +39,7 @@ if [ $END -gt 41 ]; then
 fi
 
 # Redirect output and error
-exec > logs/new_reg_beta/ipca_K${K}_${START}to${END}_${timestamp}.out 2>&1
+exec > logs/new_reg_beta/ipca_K${K}_$((START+1))to$((END))_${timestamp}.out 2>&1
 
 # Run your script, unbuffered -u to display output on the go
 srun python -u 02_3_newrun_ipca_beta.py $K $START $END

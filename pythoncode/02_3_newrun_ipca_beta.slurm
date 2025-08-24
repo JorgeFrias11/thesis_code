@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH --output=/dev/null
-#SBATCH --array=0-4   # 4 jobs, chunks of 10 chars each
+#SBATCH --array=4   # 4 jobs, chunks of 10 chars each
 #SBATCH --nodes=1
-#SBATCH --job-name=7_beta
-#SBATCH --cpus-per-task=120
-#SBATCH --mem=450G
-#SBATCH --partition=compute
+#SBATCH --job-name=6_beta
+#SBATCH --cpus-per-task=100
+#SBATCH --mem=850G
+#SBATCH --partition=highmem
 
 # DEFINE K!
-K=7
+K=6
 
 # Load necessary modules 
 module purge

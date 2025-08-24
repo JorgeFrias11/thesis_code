@@ -1,11 +1,12 @@
 #!/bin/bash
 #SBATCH --output=/dev/null
-#SBATCH --job-name=ipca_alpha
-#SBATCH --array=1-7   # Runs regs K = 1 to 7
+#SBATCH --job-name=2-6_alpha
+#SBATCH --array=2-6   # Runs regs K = 1 to 6
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=40
-#SBATCH --mem=300G
-#SBATCH --partition=highmem
+#SBATCH --cpus-per-task=120
+#SBATCH --mem=400G
+#SBATCH --partition=gpu
+##SBATCH --nodelist=clustercompute12
 
 # Load necessary modules 
 module purge

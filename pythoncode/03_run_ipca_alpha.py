@@ -13,7 +13,7 @@ data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl
 
 starttime = timer()
 
-print("Using 40 cpus and 300GB of memory... \n")
+print("Using 120 cpus and 450GB of memory... \n")
 
 print(f"Base model results:")
 

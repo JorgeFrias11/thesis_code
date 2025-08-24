@@ -1,25 +1,25 @@
 # Add the parent of the parent directory to the Python path
-#current_dir = Path().resolve()
-#sys.path.append(str(current_dir.parents[1]))
+# current_dir = Path().resolve()
+# sys.path.append(str(current_dir.parents[1]))
 
 import pandas as pd
 import ipca_utils
 import pickle
 
-#datapath = "/home/jfriasna/thesis_data/data/"
+# datapath = "/home/jfriasna/thesis_data/data/"
 datapath = "/home/jori/Documents/QFIN/thesis_data/data/"
 data, coin_id = ipca_utils.load_coindata('daily', datapath,
-                                cache_file = 'cache_daily_preds.pkl',
-                                daily_rds='daily_predictors.rds',
-                                ignore_cols=['logvol', 'nsi', 'GPRD', 'GPRD_MA7', 'GPRD_MA30'],
-                                pruitt=True,
-                                save = True)
+                                         cache_file='cache_daily_preds.pkl',
+                                         daily_rds='daily_predictors.rds',
+                                         ignore_cols=['logvol', 'nsi', 'GPRD', 'GPRD_MA7', 'GPRD_MA30'],
+                                         pruitt=True,
+                                         save=True)
 
 print(data.columns)
 
 ##################################################################################
-## TEST 2: Shorten time period, and keep coins with at least 75% of total obs
-## Period: 2020-01-01 to 2025-07-31
+# TEST 2: Shorten time period, and keep coins with at least 75% of total obs
+# Period: 2020-01-01 to 2025-07-31
 ##################################################################################
 
 print("Number of coins in the whole sample:", len(data.index.get_level_values('coinName').unique()))
@@ -46,7 +46,7 @@ num_days = len(total_dates)
 coin_counts = data_in_range.groupby(level='coinName').size()
 
 # Step 6: Keep coins with >= 75% of possible observations
-#min_obs_required = int(0.5 * num_days)
+# min_obs_required = int(0.5 * num_days)
 min_obs_required = 365
 eligible_coins = coin_counts[coin_counts >= min_obs_required].index
 
@@ -81,7 +81,7 @@ high_corr = corr_pairs[(abs(corr_pairs) > 0.85) & (abs(corr_pairs) < 1)]
 print(high_corr)
 
 # remove variable with high correlation
-#data = data.drop(["illiq", "std_vol", "maxdprc", "stdprcvol", "beta2",
+# data = data.drop(["illiq", "std_vol", "maxdprc", "stdprcvol", "beta2",
 #                      "std_turn", "GPRD", "GPRD_MA7", "GPRD_MA30", "nsi"], axis=1)
 
 data = data.drop(["maxdprc", "prcvol", "stdprcvol", "volscaled", "beta2"], axis=1)
@@ -104,5 +104,27 @@ print("Final list of characteristics (excluding ret_excess): ")
 print(data.columns)
 
 # Save the processed data for the empirical analysis
-#data.to_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
+# data.to_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
 data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/processed_daily_preds.pkl")
+
+
+import pandas as pd
+import requests
+import json
+import math
+import datetime as dt
+import threading
+import time
+import numpy as np
+
+uri = 'https://api.exchange.coinbase.com/products'
+response = requests.get(uri).json()
+pair = []
+for i in range(len(response)):
+    if "USD" in response[i]['id']:
+        pair.append(response[i]['id'])
+
+len(pair)
+usdt_pairs = [p for p in pair if p.endswith("USD")]
+
+print(len(usdt_pairs))

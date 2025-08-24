@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --output=/dev/null
 #SBATCH --job-name=ipca_alpha
-#SBATCH --array=1-7   # Runs regs K = 1 to 7
+#SBATCH --array=1-4   # Runs regs K = 1 to 7
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=40
-#SBATCH --mem=300G
-#SBATCH --partition=highmem
+#SBATCH --cpus-per-task=120
+#SBATCH --mem=450G
+#SBATCH --partition=compute-test
 
 # Load necessary modules 
 module purge

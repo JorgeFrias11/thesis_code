@@ -11,11 +11,7 @@ from timeit import default_timer as timer
 data = pd.read_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
 # data = pd.read_pickle("/home/jori/Documents/QFIN/thesis_data/data/processed_daily_preds.pkl")
 
-<<<<<<< HEAD
-fitstart = timer()
-=======
 starttime = timer()
->>>>>>> fa4944c47ab8828cc24fa1ea2f8bba43af188cc2
 
 print(f"Base model results:")
 

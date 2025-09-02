@@ -9,6 +9,7 @@ import pickle
 import sys
 import os
 from timeit import default_timer as timer
+from datetime import datetime
 
 starttime = timer()
 
@@ -42,7 +43,7 @@ model = ipca_pruitt_2.ipca(RZ=coindata, return_column='ret_excess', add_constant
 
 results_summary = []
 
-for k in range(1, 7):  # latent factors 1..6
+for k in range(1, 3):  # latent factors 1..6
     print(f"\nFactor={obs_factor}, K={k} latent factors")
     fit = model.fit(
         K=k,
@@ -72,7 +73,8 @@ results_df = pd.DataFrame(results_summary)
 print("\nFinal results:")
 print(results_df)
 
-outfile = os.path.join(outpath, f"delta_bootstrap_{obs_factor}.pkl")
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+outfile = os.path.join(outpath, f"delta_bootstrap_{obs_factor}_{timestamp}.pkl")
 with open(outfile, "wb") as f:
     pickle.dump(results_df, f)
 

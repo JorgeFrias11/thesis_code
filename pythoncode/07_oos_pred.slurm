@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=oos_ipca
-#SBATCH --array=2-6     # K = 1,...,6 latent factors
+#SBATCH --array=6     # K = 1,...,6 latent factors
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=30
+#SBATCH --cpus-per-task=26
 #SBATCH --mem=100G
 #SBATCH --partition=gpu
 

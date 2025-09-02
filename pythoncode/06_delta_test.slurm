@@ -2,8 +2,8 @@
 #SBATCH --job-name=delta_test
 #SBATCH --array=5              # 5 tasks, one per observable factor
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=120
-#SBATCH --mem=450G
+#SBATCH --cpus-per-task=64
+#SBATCH --mem=200G
 #SBATCH --partition=gpu
 
 # Load necessary modules 

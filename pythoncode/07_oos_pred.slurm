@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=oos_ipca
-#SBATCH --array=6     # K = 1,...,6 latent factors
+#SBATCH --array=3-6     # K = 1,...,6 latent factors
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=26
-#SBATCH --mem=100G
-#SBATCH --partition=gpu
+#SBATCH --cpus-per-task=120
+#SBATCH --mem=200G
+#SBATCH --partition=short
 
 # Load Python
 module purge
@@ -19,7 +19,7 @@ export PYTHONPATH=/home/jfriasna/thesis_code/pythoncode:$PYTHONPATH
 # Get timestamp
 timestamp=$(date +%Y-%m-%d_%H-%M-%S)
 
-exec > logs/oos_pred/oos_${SLURM_ARRAY_TASK_ID}_${timestamp}.out 2>&1
+exec > logs/oos_pred/alpha_latent/oos_${SLURM_ARRAY_TASK_ID}_${timestamp}.out 2>&1
 
 # Run
 srun python -u 07_oos_pred.py $SLURM_ARRAY_TASK_ID

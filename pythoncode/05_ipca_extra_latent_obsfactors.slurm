@@ -20,7 +20,8 @@ export PYTHONPATH=/home/jfriasna/thesis_code/pythoncode:$PYTHONPATH
 timestamp=$(date +%Y-%m-%d_%H-%M-%S)
 
 # Redirect output and error
-exec > logs/05_ipca_latent_obsfactors.out 2>&1
+#exec > logs/05_ipca_latent_obsfactors.out 2>&1
+exec > logs/05_ipca_extra_latent_obsfactors.out 2>&1
 
 # Run script unbuffered -u to display output 
-srun python -u 05_ipca_latent_obsfactors.py
+srun python -u 05_ipca_extra_latent_obsfactors.py

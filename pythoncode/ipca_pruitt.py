@@ -1,25 +1,20 @@
 '''
 Personal notes:
 RZ = df containing returns and characteristics in a 2-level multiIndex, with 0-level = date,
-    1-level = asset ID.
+     1-level = asset ID.
 R = return series
 Z = characteristics
 self.X = characteristics weighted portfolios  (self.Q in Kellys code)
-
 '''
-
 
 '''
 IPCA:
 IPCA estimation class
-
 version 1.0.3
-
-
-
 copyright Seth Pruitt (2020)
 '''
 
+import sys
 import pandas as pd
 import numpy as np
 import scipy.linalg as sla
@@ -29,6 +24,7 @@ from datetime import datetime
 from timeit import default_timer as timer
 # from numba import jit
 from joblib import Parallel, delayed
+from tqdm import tqdm
 
 # matrix left/right division (following MATLAB function naming)
 
@@ -404,7 +400,8 @@ class ipca(object):
                                'iters': pd.DataFrame(data=np.nan, columns=self.Dates, index=[0]),
                                'time': pd.DataFrame(data=np.nan, columns=self.Dates, index=[0])}
             ct = 0
-            for t in self.Dates[OOS_window_specs:]:
+            for t in tqdm(self.Dates[OOS_window_specs:], desc="OOS fit", dynamic_ncols=True,
+                          leave=True, file=sys.stdout):
                 tol, iters = float('inf'), 0
                 if OOS_window == 'rolling':
                     datest = self.X.loc[:, :t - OOS_window_specs:t - 1].columns  # dates through t-1, not including t
@@ -415,20 +412,21 @@ class ipca(object):
                 timerstart = timer()
                 while iters < maxIters and tol > minTol:
                     iters += 1
-                    # for first t, Gamma0 will be from _svd_initial outside loop; for subsequent t, will be that last
-                    #  Gamma0 obtained in the previous t's iterative "while" stmt
-                    Gamma1, Factor1 = self._linear_als_estimation(Gamma0=Gamma0.copy(), gFac=gFac,  # make _gFac for ndarray-based
+                    Gamma1, Factor1 = self._linear_als_estimation(Gamma0=Gamma0.copy(), gFac=gFac,
                                                                   K=K, M=M, KM=KM,
                                                                   normalization_choice=normalization_choice,
                                                                   normalization_choice_specs=normalization_choice_specs,
                                                                   Dates=datest)
-
                     tolGam = np.max(np.abs(Gamma1 - Gamma0))
-                    tolFac = np.max(np.abs(Factor1 - Factor0))
-                    tol = np.max((tolGam, tolFac))
+                    # tolFac = np.max(np.abs(Factor1 - Factor0))
+                    # tol = np.max((tolGam, tolFac))
+                    if K > 0:
+                        tolFac = np.max(np.abs(Factor1 - Factor0))
+                        tol = np.max((tolGam, tolFac))
+                    else:
+                        tol = tolGam
                     if dispIters and iters % dispItersInt == 0:
                         print('iters {}: tol = {}'.format(iters, tol))
-                    # replace 0 with 1, for next iteration
                     Gamma0, Factor0 = Gamma1.copy(), Factor1.copy()
 
                 numerical_stats['tol'][t] = tol
@@ -437,15 +435,21 @@ class ipca(object):
                 Gamma.loc[t] = Gamma0
                 # "OOS" factor realization: use Gamma0 and W known at time t-1, but X known at time t
                 if M == 0:
-                    Factor[t] = _mldivide(Gamma.loc[t].T.dot(self.W.loc[t]).dot(Gamma.loc[t]), Gamma.loc[t].T.dot(self.X[t]))
+                    Factor[t] = _mldivide(Gamma.loc[t].T.dot(self.W.loc[t]).dot(Gamma.loc[t]),
+                                          Gamma.loc[t].T.dot(self.X[t]))
                 else:
-                    tmp = _mldivide(Gamma.loc[t, F_names].T.dot(self.W.loc[t]).dot(Gamma.loc[t, F_names]), Gamma.loc[t, F_names].T.dot(self.X[t]))
-                    Factor[t].loc[F_names] = tmp
-                    Factor[t].loc[G_names] = gFac[t].values
+                    if K > 0:
+                        tmp = _mldivide(Gamma.loc[t, F_names].T.dot(self.W.loc[t]).dot(Gamma.loc[t, F_names]),
+                                        Gamma.loc[t, F_names].T.dot(self.X[t]))
+                        # Factor[t].loc[F_names] = tmp
+                        # Factor[t].loc[G_names] = gFac[t].values
+                        Factor.loc[F_names, t] = tmp
+                    # prespecified factors (always, if M>0)
+                    Factor.loc[G_names, t] = gFac.loc[G_names, t].values
                 fittedX['Fits_Total'][t] = self.W.loc[t].dot(Gamma.loc[t]).dot(Factor[t]).values.reshape((-1, 1))
                 # calculate Lambda and fill predictive fits
                 if factor_mean == 'constant':
-                    Lambda[t] = Factor0.mean(axis=1)  # actually known before t; but we label to associate it with its realization
+                    Lambda[t] = Factor0.mean(axis=1)
                     B = np.hstack((np.zeros((KM, KM)), Factor0.mean(axis=1).reshape((-1, 1)))).T
                 elif factor_mean == 'VAR1':
                     B = self._VARB(X=Factor0)
@@ -477,11 +481,15 @@ class ipca(object):
                     fittedBeta.loc[t] = Betat.values
 
                 # Prepare for next period through loop
-                Factor0 = np.concatenate((Factor0.copy(), np.zeros((Factor0.shape[0], 1))), axis=1)
+                if K > 0:
+                    Factor0 = np.concatenate((Factor0.copy(), np.zeros((Factor0.shape[0], 1))), axis=1)
+                else:
+                    Factor0 = gFac.loc[:, datest].values
+
                 ct += 1
                 if dispIters and ct % 12 == 0:
-                    print('%s is done and took %i iterations and %0.2f seconds' %
-                          (t, numerical_stats['iters'][t], numerical_stats['time'][t]))
+                    tqdm.write(f"{t} done in {numerical_stats['iters'][t].item()} iterations, "
+                               f"{numerical_stats['time'][t].item():.2f} seconds")
 
             # R2s
             fittedX['R2_Total'], fittedX['R2_Pred'] = self._R2_calc(
@@ -1041,6 +1049,57 @@ class ipca(object):
 
         return pval
 
+    def BS_Wdelta(self, ndraws=1000, n_jobs=1, backend='loky',
+                  minTol=1e-4, maxIters=1000):
+        """
+        Bootstrap inference on the hypothesis Gamma_delta = 0
+        (significance of pre-specified factor).
+
+        Parameters
+        ----------
+        ndraws  : int
+            Number of bootstrap draws.
+        n_jobs  : int
+            Number of workers for parallelization.
+        backend : str
+            Joblib backend.
+        minTol, maxIters : controls ALS convergence in re-estimation
+
+        Returns
+        -------
+        pval : float
+            p-value from test H0: Gamma_delta = 0
+        """
+
+        if not hasattr(self, "X"):
+            raise ValueError("Bootstrap can only be run on a fitted model.")
+
+        if self.G_names is None or len(self.G_names) != 1:
+            raise ValueError("Implemented only for exactly one pre-specified factor.")
+
+        N, L, T = self.N, self.L, self.T
+
+        # Compute Wdelta (test statistic in actual sample)
+        Wdelta = self.Gamma[:, -1].T.dot(self.Gamma[:, -1])
+
+        # Compute residuals
+        d = np.full((L, T), np.nan)
+        X_array = self.X_as_array()
+        W_array = self.W_as_array()
+        dates = self.Dates.values
+
+        for t_i, t in enumerate(dates):
+            d[:, t_i] = X_array[:, t_i] - W_array[:, :, t_i].dot(self.Gamma).dot(self.Factors[:, t_i])
+
+        print("Starting Bootstrap for delta...")
+        Wdelta_b = Parallel(n_jobs=n_jobs, backend=backend, verbose=10)(
+            delayed(_BS_Wdelta_sub)(self, n, d, minTol, maxIters) for n in range(ndraws)
+        )
+        print("Done!")
+
+        pval = np.sum(Wdelta_b > Wdelta) / ndraws
+        return pval
+
     def _fit(self, X, W, OOS=False, gFac=None, normalization_choice='PCA_positivemean',
              normalization_choice_specs=None, dispIters=False, minTol=1e-4, maxIters=5000, F_names=None,
              G_names=None, dispItersInt=100):
@@ -1203,6 +1262,41 @@ def _BS_Wbeta_sub(model, n, d, l, minTol=1e-4, maxIters=1000):
     Wbeta_l_b = Gamma[l, :].dot(Gamma[l, :].T)
     Wbeta_l_b = np.trace(Wbeta_l_b)
     return Wbeta_l_b
+
+
+def _BS_Wdelta_sub(model, n, d, minTol=1e-4, maxIters=1000):
+    L, T = model.L, model.T
+    X_b = np.full((L, T), np.nan)
+    np.random.seed(n)
+
+    X_array = model.X_as_array()
+    W_array = model.W_as_array()
+
+    # Modify Gamma such that last column (Gamma_delta) = 0
+    Gamma_delta = np.copy(model.Gamma)
+    Gamma_delta[:, -1] = 0
+
+    Gamma = None
+    while Gamma is None:
+        try:
+            for t in range(T):
+                d_temp = np.random.standard_t(5)
+                d_temp *= d[:, np.random.randint(0, high=T)]
+                X_b[:, t] = W_array[:, :, t].dot(Gamma_delta).dot(model.Factors[:, t]) + d_temp
+
+            # convert to DataFrame to match _fit() input
+            X_b_df = pd.DataFrame(X_b, index=model.Chars, columns=model.Dates)
+            Gamma, Factors = model._fit(X=X_b_df, W=model.W,
+                                        minTol=minTol, maxIters=maxIters,
+                                        gFac=model.gFac)
+
+        except np.linalg.LinAlgError:
+            warnings.warn("Singularity in bootstrap iteration. Discarding draw.")
+            pass
+
+    # Compute Wdelta_b
+    Wdelta_b = Gamma[:, -1].T.dot(Gamma[:, -1])
+    return Wdelta_b
 
     # def _prep_metad(self):
     #     """handle mapping from different inputs type to consistent internal data

@@ -67,7 +67,7 @@ for k in range(1, len(factor_list) + 1):
         gFac=gFac,
         dispIters=False,
         minTol=mintol,
-        maxIters=100
+        maxIters=1000
     )
     results_summary.append({
         "model": f"DL_{k}",

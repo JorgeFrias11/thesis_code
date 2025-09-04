@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --output=/dev/null
-#SBATCH --job-name=factors_reg
+#SBATCH --job-name=all_fit
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=60
 #SBATCH --mem=200G
@@ -17,10 +17,10 @@ source ~/pyvenv/bin/activate
 export PYTHONPATH=/home/jfriasna/thesis_code/pythoncode:$PYTHONPATH
 
 # Get timestamp
-timestamp=$(date +%Y-%m-%d_%H-%M-%S)
+#timestamp=$(date +%Y-%m-%d_%H-%M-%S)
 
 # Redirect output and error
-exec > logs/05_ipca_latent_obsfactors.out 2>&1
+exec > logs/11_fit_all_yearmissing.out 2>&1
 
 # Run script unbuffered -u to display output 
-srun python -u 05_ipca_latent_obsfactors.py
+srun python -u 11_fit_all_yearmissing.py 

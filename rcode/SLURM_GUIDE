@@ -1,10 +1,16 @@
-## Setup Example
-# Need to install R packages before running the script
+## Setup R in CLUSTER Computer 
+# Need to install R packages before running the scripts
+# Follow these commands to install them
 ~~
 mkdir ~/R_LIBS
 ml r-4.4.1-gcc-12.2.0-x6ecfp6 
-ml openmpi-4.1.4-xhgzf5w
 
 Rscript install.R
-sbatch mpi-atc.slurm 
 ~~
+
+# Then, we can run rscripts (after loading the module)
+# by simply typing:
+# Rscrip script_name.R
+
+# or to store output:
+# Rscript script_name.R > logs/log_file.out 2>&1 &

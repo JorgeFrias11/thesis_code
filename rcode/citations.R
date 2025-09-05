@@ -5,7 +5,7 @@
 
 packages_used <- c("httr", "jsonlite", "tidyverse", "dplyr", "purrr", "zoo", 
                    "lubridate", "readxl", "slider", "purrr", "moments", "ggplot2",
-                   "quantmod", "bidask", "PerformanceAnalytics", "pcaMethods")
+                   "quantmod", "bidask", "PerformanceAnalytics")
 
 library(grateful)
 

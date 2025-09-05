@@ -1,3 +1,5 @@
+# Install necessary packages in local library (read CLUSTER GUIDE cluster)
+
 packages_used <- c("dplyr", "readxl", "slider", "purrr", "moments", "zoo", "lubridate",
                     "quantmod", "bidask", "tidyr", "PerformanceAnalytics")
 

@@ -4,7 +4,6 @@ import pandas as pd
 import ipca_utils
 
 datapath = "/home/jfriasna/thesis_data/data/"
-#datapath = "/home/jori/Documents/QFIN/thesis_data/data/"
 data, coin_id = ipca_utils.load_coindata('daily', datapath,
                                 cache_file = 'cache_daily_preds.pkl',
                                 daily_rds='daily_predictors.rds',
@@ -24,7 +23,7 @@ print("Number of coins in the full sample period:", len(data.index.get_level_val
 date_ints = data.index.get_level_values('date')
 date_dt = pd.to_datetime(date_ints.astype(str), format="%Y%m%d")
 
-# Mask for date range (2018-06-01 to 2025-07-31)
+# date range (2018-06-01 to 2025-07-31)
 start_date = pd.to_datetime("2018-06-01")
 end_date = pd.to_datetime("2025-07-31")
 mask = (date_dt >= start_date) & (date_dt <= end_date)
@@ -52,8 +51,7 @@ print("Total number of coins:", len(eligible_coins))
 idx = pd.IndexSlice
 filtered_data = data_in_range.loc[idx[:, eligible_coins], :]
 
-#filtered_data.to_pickle("/home/jfriasna/thesis_data/data/filtered_daily_panel.pkl")
-#filtered_data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/filtered_data.pkl")
+filtered_data.to_pickle("/home/jfriasna/thesis_data/data/filtered_daily_panel.pkl")
 
 data = filtered_data
 
@@ -71,6 +69,7 @@ data = data[data.index.get_level_values('date').isin(valid_dates)]
 
 print("nrows after removing low cross-section dates:", data.shape)
 print("Total number of days after min cross-section:", len(data.index.get_level_values('date').unique()))
+
 ##################################################################################
 # Check correlation
 ##################################################################################
@@ -109,4 +108,3 @@ print(data.columns)
 
 # Save the processed data for the empirical analysis
 data.to_pickle("/home/jfriasna/thesis_data/data/processed_daily_preds.pkl")
-#data.to_pickle("/home/jori/Documents/QFIN/thesis_data/data/processed_daily_preds.pkl")

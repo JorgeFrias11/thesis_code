@@ -1,10 +1,14 @@
 '''
+I incorporated extra functions to Seth Pruitt code to run the
+Wald-type bootstraps for hypothesis testing of statistical significance. 
+Those functions are based on the ipca package https://github.com/bkelly-lab/ipca 
+
 Personal notes:
 RZ = df containing returns and characteristics in a 2-level multiIndex, with 0-level = date,
      1-level = asset ID.
 R = return series
-Z = characteristics
-self.X = characteristics weighted portfolios  (self.Q in Kellys code)
+Z = characteristic matrix
+self.X = characteristics weighted portfolios  (self.Q in Kellys matlab code)
 '''
 
 '''

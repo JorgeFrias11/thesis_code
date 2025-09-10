@@ -21,9 +21,7 @@ coindata = coindata.sort_index(level=[0, 1])  # ensure MultiIndex is sorted
 
 #  Fit OOS model
 mintol = 1e-6
-#model = ipca_pruitt.ipca(RZ=coindata, return_column='ret_excess', add_constant=False)
-# Model with intercept
-model = ipca_pruitt.ipca(RZ=coindata, return_column='ret_excess', add_constant=True) 
+model = ipca_pruitt.ipca(RZ=coindata, return_column='ret_excess', add_constant=False)
 
 # Cutoff date: June 1, 2023 (~70% of dataset for training, ~1826 days)
 cutoff = 20230601
@@ -59,9 +57,7 @@ print(results_df.to_string(index=False))
 time = round(timer() - starttime, 2)
 print(f"Model completed in: {time} seconds")
 
-# -------------------------------
-#  Save results
-# -------------------------------
+# Save results
 output_dir = os.path.expanduser("~/thesis_output/oos_pred/alpha_latent")
 os.makedirs(output_dir, exist_ok=True)
 

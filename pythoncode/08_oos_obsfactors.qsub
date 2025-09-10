@@ -1,0 +1,21 @@
+#!/bin/bash
+#$ -N ipca_oos
+#$ -cwd
+#$ -t 1-10
+#$ -pe smp 20
+#$ -o /dev/null
+#$ -e /dev/null
+
+# Activate virtual environment
+source $HOME/pyvenv/bin/activate
+
+# Add pythoncod dir to PYTHONPATH
+export PYTHONPATH=$HOME/thesis_code/pythoncode:$PYTHONPATH
+
+timestamp=$(date +%Y-%m-%d_%H-%M-%S)
+
+# Redirect output
+exec > logs/oos_pred/obsfactors/fit_${SGE_TASK_ID}_${timestamp}.out 2>&1
+
+# Run python script
+python3.10 -u 08_oos_obsfactors.py $SGE_TASK_ID

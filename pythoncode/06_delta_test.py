@@ -13,7 +13,6 @@ from datetime import datetime
 
 starttime = timer()
 
-# Paths
 datapath = "/home/jfriasna/thesis_data/data/"
 outpath = "/home/jfriasna/thesis_output/"
 
@@ -26,7 +25,7 @@ factors['date'] = pd.to_datetime(factors['date'])
 factors['date'] = factors['date'].dt.strftime('%Y%m%d').astype(int)
 factors.set_index('date', inplace=True)
 
-# Observable factors
+# Pre-specified observable factors
 factor_list = ['CMKT', 'MOM', 'SMB', 'LIQ', 'VOL']
 
 task_id = int(sys.argv[1]) - 1  
